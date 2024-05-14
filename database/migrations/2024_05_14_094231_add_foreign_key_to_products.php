@@ -13,9 +13,9 @@ class AddForeignKeyToProducts extends Migration
      */
     public function up()
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->foreign('modified_by')->references('email')->on('users');
-        });
+        // Schema::table('products', function (Blueprint $table) {
+        //     $table->foreign('modified_by')->references('email')->on('users');
+        // });
     }
 
     /**
@@ -25,8 +25,8 @@ class AddForeignKeyToProducts extends Migration
      */
     public function down()
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropForeign(['modified_by']);
-        });
+        // Schema::table('products', function (Blueprint $table) {
+        //     $table->dropForeign(['modified_by']);
+        // });
     }
 }
