@@ -26,7 +26,7 @@ Route::get('auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
 // Public product routes (read-only)
-Route::get('product/{id}', [ProductController::class, 'show']);
+Route::get('product', [ProductController::class, 'show']);
 Route::get('products', [ProductController::class, 'index']);
 
 // Public category routes (read-only)

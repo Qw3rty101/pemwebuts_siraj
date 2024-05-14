@@ -35,7 +35,7 @@ class ProductController extends Controller
         return response()->json('Product saved',201);
     }
 
-    public function show($id)
+    public function show()
     {
         $products = Product::all();
 
