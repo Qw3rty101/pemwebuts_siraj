@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -65,34 +66,46 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
     public function handleGoogleCallback()
     {
+        Log::info('Google callback hit'); // Tambahkan pesan log
+
         try {
-            // Dapatkan data pengguna dari Google
-            $user = Socialite::driver('google')->user();
-            
-            // Cek apakah pengguna dengan email yang sama sudah ada di database
-            $existingUser = User::where('email', $user->email)->first();
-            
-            if ($existingUser) {
-                // Autentikasi pengguna yang sudah ada
-                $token = $existingUser->createToken('auth_token')->plainTextToken;
+            $googleUser = Socialite::driver('google')->user();
+            Log::info('User details from Google retrieved', ['user' => $googleUser]);
+
+            // Check if the user already exists in the database
+            $user = User::where('email', $googleUser->email)->first();
+            Log::info('User lookup result', ['user' => $user]);
+
+            if ($user) {
+                // If the user exists, log them in
+                $token = $user->createToken('auth_token')->plainTextToken;
+                Log::info('Token created for existing user', ['token' => $token]);
                 return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
             } else {
-                // Registrasi pengguna baru
-                $newUser = User::create([
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    // Anda mungkin ingin menghasilkan password acak untuk pengguna baru
+                // If the user doesn't exist, create a new user
+                $user = User::create([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
                     'password' => Hash::make('random_password'),
                 ]);
-    
-                // Autentikasi pengguna baru
-                $token = $newUser->createToken('auth_token')->plainTextToken;
+                Log::info('New user created', ['user' => $user]);
+
+                $token = $user->createToken('auth_token')->plainTextToken;
+                Log::info('Token created for new user', ['token' => $token]);
                 return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
             }
         } catch (\Exception $e) {
-            // Tangani kesalahan jika terjadi
+            // Log the error message for debugging
+            Log::error('Google authentication failed', ['exception' => $e->getMessage()]);
+
+            // Return the error message in the response for debugging
             return response()->json(['message' => 'Failed to authenticate with Google: ' . $e->getMessage()], 500);
         }
     }
