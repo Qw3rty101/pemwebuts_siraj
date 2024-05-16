@@ -53,11 +53,12 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid login details'], 401);
         }
 
-        $user = User::where('email', $request['email'])->firstOrFail();
+        $user = User::where('email', $request['email'])->first();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
     }
+    
 
     public function logout(Request $request)
     {
@@ -93,7 +94,7 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => $googleUser->name,
                     'email' => $googleUser->email,
-                    'password' => Hash::make('random_password'),
+                    'password' => Hash::make('Pengen_masuk'),
                 ]);
                 Log::info('New user created', ['user' => $user]);
 
